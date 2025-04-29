@@ -1,17 +1,27 @@
 services:
   zookeeper:
     image: zookeeper:3.8.0
+    hostname: zookeeper
+    container_name: zookeeper
     ports:
       - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
   kafka:
     image: confluentinc/cp-kafka:latest
+    hostname: kafka1
+    restart: on-failure
+    #network_mode: host  # Использует сетевой стек хоста
     ports:
-      - "9094:9092" #9094 внешний
+      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka1:9092,OUTSIDE://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_LOG_DIRS: /kafka-logs
       KAFKA_BROKER_ID: 1

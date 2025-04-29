@@ -6,7 +6,7 @@ import java.util.*
 
 fun main() {
     val topic = "tasks"
-    val server = "localhost:9092"
+    val server = "localhost:29092"
     newConsumer(server).use { consumer ->
         consumer.subscribe(listOf(topic))
         while (true) {

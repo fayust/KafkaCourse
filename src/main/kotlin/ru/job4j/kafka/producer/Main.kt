@@ -10,7 +10,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 
 fun main() = runBlocking {
     val topic = "tasks"
-    val server = "localhost:9092"
+    val server = "localhost:29092"
     newProducer(server).use { producer ->
         repeat(Int.MAX_VALUE) { i ->
             val msg = "Task $i"
