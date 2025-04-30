@@ -1,3 +1,3 @@
 
-rootProject.name = "job4j_kafka"
+rootProject.name = "KafkaCourse"
 
