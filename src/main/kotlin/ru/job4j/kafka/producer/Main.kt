@@ -1,17 +1,16 @@
 package ru.job4j.kafka.producer
 
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.clients.consumer.ConsumerRecords
-import java.time.Duration
 import java.util.*
 import kotlinx.coroutines.*
 import org.apache.kafka.clients.producer.ProducerRecord
+import ru.job4j.kafka.config.KafkaConfig
+import ru.job4j.kafka.config.loadConfig
 
 fun main() = runBlocking {
-    val topic = "tasks"
-    val server = "localhost:29092"
-    newProducer(server).use { producer ->
+    val config = loadConfig("src/main/resources/application.yaml")
+    val topic = config.taskTopic // Используем топик из конфигурации
+    newProducer(config).use { producer ->
         repeat(Int.MAX_VALUE) { i ->
             val msg = "Task $i"
             producer.send(ProducerRecord(topic, msg))
@@ -21,12 +20,12 @@ fun main() = runBlocking {
     }
 }
 
-fun newProducer(server: String): KafkaProducer<String, String> {
-    val config = Properties().apply {
-        put("bootstrap.servers", server)
-        put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-        put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+fun newProducer(config: KafkaConfig): KafkaProducer<String, String> {
+    val producerConfig  = Properties().apply {
+        put("bootstrap.servers", config.bootstrapServers)
+        put("key.serializer", config.producer.keySerializer)
+        put("value.serializer", config.producer.valueSerializer)
     }
-    return KafkaProducer<String, String>(config)
+    return KafkaProducer<String, String>(producerConfig)
 }
 

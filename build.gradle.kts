@@ -20,6 +20,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     implementation("org.apache.kafka:kafka-clients:3.6.0")
     testImplementation(kotlin("test"))
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0")
 }
 
 kotlin {
