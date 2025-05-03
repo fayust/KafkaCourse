@@ -1,12 +1,11 @@
-kafka:
-  bootstrap-servers: localhost:29092
-  consumer:
-    group-id: my-consumer-group
-    auto-offset-reset: earliest
-    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-  producer:
-    key-deserializer: org.apache.kafka.common.serialization.StringSerializer
-    value-deserializer: org.apache.kafka.common.serialization.StringSerializer
-  task_topic: tasks
-  message_topic: messages
+bootstrap-servers: "localhost:29092"
+consumer:
+  group-id: "my-consumer-group"
+  auto-offset-reset: "earliest"
+  key-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+  value-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+producer:
+  key-serializer: "org.apache.kafka.common.serialization.StringSerializer"
+  value-serializer: "org.apache.kafka.common.serialization.StringSerializer"
+task-topic: "tasks"
+message-topic: "messages"

@@ -8,7 +8,7 @@ import ru.job4j.kafka.config.KafkaConfig
 import ru.job4j.kafka.config.loadConfig
 
 fun main() = runBlocking {
-    val config = loadConfig("src/main/resources/application.yaml")
+    val config = loadConfig()
     val topic = config.taskTopic // Используем топик из конфигурации
     newProducer(config).use { producer ->
         repeat(Int.MAX_VALUE) { i ->
