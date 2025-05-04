@@ -9,12 +9,18 @@ import ru.job4j.kafka.config.loadConfig
 
 fun main() = runBlocking {
     val config = loadConfig()
-    val topic = config.taskTopic // Используем топик из конфигурации
+    val topic = config.messageTopic
+    val rnd = Random().apply { setSeed(System.currentTimeMillis()) }
     newProducer(config).use { producer ->
+        val partitions = producer.partitionsFor(topic)
+        partitions.forEach { partitionInfo ->
+            println("Partition: ${partitionInfo.partition()}, Leader: ${partitionInfo.leader()}")
+        }
         repeat(Int.MAX_VALUE) { i ->
             val msg = "Task $i"
-            producer.send(ProducerRecord(topic, msg))
-            println("Send $msg")
+            val key = rnd.nextInt(3)
+            val meta = producer.send(ProducerRecord(topic, key.toString(), msg))
+            println("text=$msg key=$key partition=${meta.get().partition()}")
             delay(1000)
         }
     }

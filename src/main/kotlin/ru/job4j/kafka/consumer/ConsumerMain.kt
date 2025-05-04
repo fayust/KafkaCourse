@@ -8,9 +8,8 @@ import java.util.*
 
 fun main() {
     val config = loadConfig()
-    val topic = config.taskTopic
-    // Запускаем первого потребителя
-    val firstConsumerThread = Thread {
+    val topic = config.messageTopic
+    val firstConsumerThread = Thread { // Запускаем первого потребителя
         newConsumer(config).use { consumer ->
             consumer.subscribe(listOf(topic))
             try {

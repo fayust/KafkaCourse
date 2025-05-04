@@ -7,25 +7,25 @@ import java.time.Duration
 fun main() {
     val config = loadConfig()
     val topic = config.messageTopic
-    val secondConsumerThread = Thread {  // Запускаем второго потребителя
+    val thirdConsumerThread = Thread { // Запускаем третьего потребителя
         newConsumer(config).use { consumer ->
             consumer.subscribe(listOf(topic))
             try {
                 while (true) {
                     val records: ConsumerRecords<String, String> = consumer.poll(Duration.ofMillis(1000))
                     records.forEach { rec ->
-                        println("Second consumer received message: key=${rec.key()}, value=${rec.value()}, partition=${rec.partition()}, offset=${rec.offset()}")
+                        println("Third consumer received message: key=${rec.key()}, value=${rec.value()}, partition=${rec.partition()}, offset=${rec.offset()}")
                     }
                 }
             } catch (e: Exception) {
-                println("Second consumer thread interrupted: ${e.message}")
+                println("Third consumer thread interrupted: ${e.message}")
             }
         }
     }
-    secondConsumerThread.start()
+    thirdConsumerThread.start()
 
     Runtime.getRuntime().addShutdownHook(Thread {
-        println("Stopping consumer 2...")
-        secondConsumerThread.interrupt() // Останавливаем второй поток при остановке приложения.
+        println("Stopping consumer 3...")
+        thirdConsumerThread.interrupt() // Останавливаем третий поток при остановке приложения.
     })
 }
