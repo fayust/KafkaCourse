@@ -7,7 +7,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import ru.job4j.kafka.config.KafkaConfig
 import ru.job4j.kafka.config.loadConfig
 
-fun main() = runBlocking {
+fun main(): Unit = runBlocking {
     val config = loadConfig()
     val topic = config.messageTopic
     val rnd = Random().apply { setSeed(System.currentTimeMillis()) }

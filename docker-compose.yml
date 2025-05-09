@@ -9,7 +9,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  kafka:
+  kafka1:
     image: confluentinc/cp-kafka:latest
     hostname: kafka1
     restart: on-failure
@@ -18,25 +18,169 @@ services:
       - "9092:9092"
       - "29092:29092"
     environment:
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 18000
       KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka1:9092,OUTSIDE://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_LOG_DIRS: /kafka-logs
-      KAFKA_NUM_IO_THREADS: 8 #число потоков ввода-вывода, по одному на каждый каталог из log.dirs
-      KAFKA_BROKER_ID: 1
+
+      KAFKA_NUM_IO_THREADS: 8 #Количество потоков для обработки запросов (включая операции с диском, логами)
+      KAFKA_NUM_NETWORK_THREADS: 3 #Количество потоков для получения запросов из сети и отправки ответов
+      KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR: 1 #Потоки для восстановления логов при старте и выгрузки при остановке
+
+      KAFKA_SOCKET_SEND_BUFFER_BYTES: 102400 # Размер буфера отправки (SO_SNDBUF)
+      KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 102400 # Размер буфера приёма (SO_RCVBUF)
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600 # Максимальный размер запроса (защита от OOM)
+
+      ############################ Topic Settings ############################
+      # Фактор репликации для внутренних топиков "__consumer_offsets" и "__transaction_state"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 #уровень репликации журнала состояния транзакций
+      TRANSACTION_STATE_LOG_MIN_ISR: 1 #минимальное количество реплик в состоянии "выполняются" (in-sync replicas)
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
       KAFKA_NUM_PARTITIONS: 3  # число разделов при создании темы
-      KAFKA_LOG_RETENTION_MS: 259200000 # время хранения сообщений (3 дня)
-      KAFKA_LOG_RETENTION_BYTES: 10737418240  # максимальный размер лога одного раздела (10 GB)
+
+      ############################ Logs Policies ############################
+      #количество сообщений, которые записаны в лог перед тем, как будут сброшены на диск
+      LOG_FLUSH_INTERVAL_MESSAGES: 10000
+      # максимальный интервал, данные могут находиться в памяти (журнале) перед тем, как будут сброшены на диск
+      LOG_FLUSH_INTERVAL_MS: 10000
+
+      KAFKA_LOG_RETENTION_HOURS: 240 # время хранения сообщений (10 дней)
+      KAFKA_LOG_RETENTION_BYTES: 1073741824  # максимальный размер лога одного раздела (1 GB)
+      #интервал, с которым Kafka проверяет, какие журналы (лог-файлы) можно удалить на основе настроек хранения
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
       KAFKA_LOG_SEGMENT_BYTES: 134217728   # размер одного сегмента лога (128 MB)
-      KAFKA_LOG_SEGMENT_MS: 3600000    # ротация сегмента по времени (1 час)
+      KAFKA_LOG_SEGMENT_MS: 3600000   # ротация сегмента по времени (1 час)
       KAFKA_MESSAGE_MAX_BYTES: 5242880   # максимальный размер одного сообщения (5 MB)
       KAFKA_BATCH_SIZE: 0   # максимальный размер batch в байтах.
       KAFKA_LINGER_MS: 500   # время, которое продюсер ждёт перед отправкой неполного batch
+
+      #время задержки, которое будет применяться перед первой переработкой группы потребителей после ее создания
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     command: ["sh", "-c", "mkdir -p /kafka-logs && chown -R 1000:1000 /kafka-logs && /etc/confluent/docker/run"]
+    user: root
+    #volumes:  #снаружи контейнера
+    #  - /c/Kafka/KafkaLogs:/kafka-logs
+    depends_on:
+      - zookeeper
+
+  kafka2:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka2
+    restart: on-failure
+    ports:
+      - "9192:9192"
+      - "29192:29192"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 18000
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka2:9192,OUTSIDE://localhost:29192
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9192,OUTSIDE://0.0.0.0:29192
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_LOG_DIRS: /kafka-logs
+
+      KAFKA_NUM_IO_THREADS: 8 #Количество потоков для обработки запросов (включая операции с диском, логами)
+      KAFKA_NUM_NETWORK_THREADS: 3 #Количество потоков для получения запросов из сети и отправки ответов
+      KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR: 1 #Потоки для восстановления логов при старте и выгрузки при остановке
+
+      KAFKA_SOCKET_SEND_BUFFER_BYTES: 102400 # Размер буфера отправки (SO_SNDBUF)
+      KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 102400 # Размер буфера приёма (SO_RCVBUF)
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600 # Максимальный размер запроса (защита от OOM)
+
+      ############################ Topic Settings ############################
+      # Фактор репликации для внутренних топиков "__consumer_offsets" и "__transaction_state"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 #уровень репликации журнала состояния транзакций
+      TRANSACTION_STATE_LOG_MIN_ISR: 1 #минимальное количество реплик в состоянии "выполняются" (in-sync replicas)
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
+      KAFKA_NUM_PARTITIONS: 3  # число разделов при создании темы
+
+      ############################ Logs Policies ############################
+      #количество сообщений, которые записаны в лог перед тем, как будут сброшены на диск
+      LOG_FLUSH_INTERVAL_MESSAGES: 10000
+      # максимальный интервал, данные могут находиться в памяти (журнале) перед тем, как будут сброшены на диск
+      LOG_FLUSH_INTERVAL_MS: 10000
+
+      KAFKA_LOG_RETENTION_HOURS: 240 # время хранения сообщений (10 дней)
+      KAFKA_LOG_RETENTION_BYTES: 1073741824  # максимальный размер лога одного раздела (1 GB)
+      #интервал, с которым Kafka проверяет, какие журналы (лог-файлы) можно удалить на основе настроек хранения
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+      KAFKA_LOG_SEGMENT_BYTES: 134217728   # размер одного сегмента лога (128 MB)
+      KAFKA_LOG_SEGMENT_MS: 3600000   # ротация сегмента по времени (1 час)
+      KAFKA_MESSAGE_MAX_BYTES: 5242880   # максимальный размер одного сообщения (5 MB)
+      KAFKA_BATCH_SIZE: 0   # максимальный размер batch в байтах.
+      KAFKA_LINGER_MS: 500   # время, которое продюсер ждёт перед отправкой неполного batch
+
+      #время задержки, которое будет применяться перед первой переработкой группы потребителей после ее создания
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    command: [ "sh", "-c", "mkdir -p /kafka-logs && chown -R 1000:1000 /kafka-logs && /etc/confluent/docker/run" ]
+    user: root
+    #volumes:  #снаружи контейнера
+    #  - /c/Kafka/KafkaLogs:/kafka-logs
+    depends_on:
+      - zookeeper
+
+  kafka3:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka3
+    restart: on-failure
+    ports:
+      - "9292:9292"
+      - "29292:29292"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 18000
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka3:9292,OUTSIDE://localhost:29292
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9292,OUTSIDE://0.0.0.0:29292
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_LOG_DIRS: /kafka-logs
+
+      KAFKA_NUM_IO_THREADS: 8 #Количество потоков для обработки запросов (включая операции с диском, логами)
+      KAFKA_NUM_NETWORK_THREADS: 3 #Количество потоков для получения запросов из сети и отправки ответов
+      KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR: 1 #Потоки для восстановления логов при старте и выгрузки при остановке
+
+      KAFKA_SOCKET_SEND_BUFFER_BYTES: 102400 # Размер буфера отправки (SO_SNDBUF)
+      KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 102400 # Размер буфера приёма (SO_RCVBUF)
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600 # Максимальный размер запроса (защита от OOM)
+
+      ############################ Topic Settings ############################
+      # Фактор репликации для внутренних топиков "__consumer_offsets" и "__transaction_state"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 #уровень репликации журнала состояния транзакций
+      TRANSACTION_STATE_LOG_MIN_ISR: 1 #минимальное количество реплик в состоянии "выполняются" (in-sync replicas)
+
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
+      KAFKA_NUM_PARTITIONS: 3  # число разделов при создании темы
+
+      ############################ Logs Policies ############################
+      #количество сообщений, которые записаны в лог перед тем, как будут сброшены на диск
+      LOG_FLUSH_INTERVAL_MESSAGES: 10000
+      # максимальный интервал, данные могут находиться в памяти (журнале) перед тем, как будут сброшены на диск
+      LOG_FLUSH_INTERVAL_MS: 10000
+
+      KAFKA_LOG_RETENTION_HOURS: 240 # время хранения сообщений (10 дней)
+      KAFKA_LOG_RETENTION_BYTES: 1073741824  # максимальный размер лога одного раздела (1 GB)
+      #интервал, с которым Kafka проверяет, какие журналы (лог-файлы) можно удалить на основе настроек хранения
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+      KAFKA_LOG_SEGMENT_BYTES: 134217728   # размер одного сегмента лога (128 MB)
+      KAFKA_LOG_SEGMENT_MS: 3600000   # ротация сегмента по времени (1 час)
+      KAFKA_MESSAGE_MAX_BYTES: 5242880   # максимальный размер одного сообщения (5 MB)
+      KAFKA_BATCH_SIZE: 0   # максимальный размер batch в байтах.
+      KAFKA_LINGER_MS: 500   # время, которое продюсер ждёт перед отправкой неполного batch
+
+      #время задержки, которое будет применяться перед первой переработкой группы потребителей после ее создания
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    command: [ "sh", "-c", "mkdir -p /kafka-logs && chown -R 1000:1000 /kafka-logs && /etc/confluent/docker/run" ]
     user: root
     #volumes:  #снаружи контейнера
     #  - /c/Kafka/KafkaLogs:/kafka-logs
