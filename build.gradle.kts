@@ -22,6 +22,10 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0")
+    testImplementation ("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.platform:junit-platform-launcher:1.8.0")
+    testImplementation("io.mockk:mockk:1.13.17")
+    testImplementation("org.hamcrest:hamcrest:3.0")
 }
 
 kotlin {
@@ -41,6 +45,10 @@ checkstyle {
     configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
 }
 
+tasks.test {
+    useJUnitPlatform()
+    jvmArgs("--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED") // Добавьте этот флаг
+}
 
 tasks.test {
     useJUnitPlatform()
@@ -53,3 +61,5 @@ tasks.withType<KotlinCompile> {
 application {
     mainClass.set("MainKt")
 }
+
+gradle.startParameter.isBuildScan = false
