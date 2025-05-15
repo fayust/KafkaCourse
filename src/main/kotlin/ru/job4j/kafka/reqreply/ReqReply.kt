@@ -1,8 +1,5 @@
 package ru.job4j.kafka.reqreply
 
-import java.util.*
-import java.util.concurrent.FutureTask
-
 class ReqReply(val timeout: Long) {
     private val monitor = Object()
     private var message = ""
@@ -33,18 +30,4 @@ class ReqReply(val timeout: Long) {
             monitor.notifyAll()
         }
     }
-}
-
-fun main() {
-    val correlationId = UUID.randomUUID().toString()
-    val reply = ReqReply(1000)
-    val sendTask = FutureTask({
-        reply.send(correlationId)
-    })
-    Thread(sendTask).start()
-    Thread({
-        Thread.sleep(500)
-        reply.receive("Send message with correlationId " + correlationId, correlationId)
-    }).start()
-    println(sendTask.get())
 }
