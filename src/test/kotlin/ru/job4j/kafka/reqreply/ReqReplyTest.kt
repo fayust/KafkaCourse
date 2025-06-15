@@ -2,6 +2,7 @@ package ru.job4j.kafka.reqreply
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import ru.job4j.kafka.service.reqreply.ReqReplyService
 import java.util.concurrent.FutureTask
 
 class ReqReplyTest {

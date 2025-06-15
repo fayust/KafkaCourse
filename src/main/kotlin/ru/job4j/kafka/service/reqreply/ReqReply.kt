@@ -1,4 +1,4 @@
-package ru.job4j.kafka.reqreply
+package ru.job4j.kafka.service.reqreply
 
 class ReqReply(val timeout: Long) {
     private val monitor = Object()

@@ -1,0 +1,18 @@
+POST http://localhost:8882//kafka-course/api/v1/kafka/consumer_run
+Content-Type: application/json
+
+{
+"consumerStartQuantity": 3
+}
+###
+POST http://localhost:8882//kafka-course/api/v1/kafka/producer_run
+Content-Type: application/json
+
+###
+POST http://localhost:8882//kafka-course/api/v1/kafka/req_reply_run
+Content-Type: application/json
+
+{
+  "reqReplyStartQuantity": 5
+}
+###
