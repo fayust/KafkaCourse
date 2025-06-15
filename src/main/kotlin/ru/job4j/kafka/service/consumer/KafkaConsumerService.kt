@@ -1,10 +1,13 @@
 package ru.job4j.kafka.service.consumer
 
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.springframework.stereotype.Service
 import ru.job4j.kafka.configuration.KafkaProperties
 import java.time.Duration
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 @Service
 class KafkaConsumerService(private val kafkaConsumer: KafkaConsumer<String, String>,
@@ -87,5 +90,31 @@ class KafkaConsumerService(private val kafkaConsumer: KafkaConsumer<String, Stri
             println("Stopping Third consumer ...")
             thirdConsumerThread.interrupt() // Останавливаем третий поток при остановке приложения.
         })
+    }
+
+    fun startMessageEventConsumerBlocking() : ConsumerRecord<String, String>? {
+        val topic = kafkaProperties.messageEventTopic
+        val executor = Executors.newSingleThreadExecutor()
+        val future: Future<ConsumerRecord<String, String>?> =
+            executor.submit<ConsumerRecord<String, String>?> {
+                kafkaConsumer.use { consumer ->
+                    consumer.subscribe(listOf(topic))
+                    try {
+                        while (true) {
+                            val records = consumer.poll(Duration.ofMillis(10000))
+                            if (records.isEmpty) continue
+                            for (rec in records) {
+                                println("MessageEvent consumer received message: key=${rec.key()}, value=${rec.value()}, partition=${rec.partition()}, offset=${rec.offset()}")
+                                return@submit rec // возврат значения из лямбда-выражения, которое передается в метод submit
+                            }
+                        }
+                    } catch (e: Exception) {
+                        println("MessageEvent consumer thread interrupted: ${e.message}")
+                    }
+                }
+                null // Возвращаем null, если ничего не было получено
+            }
+        executor.shutdown()
+        return future.get() // Блокирует до получения сообщения
     }
 }

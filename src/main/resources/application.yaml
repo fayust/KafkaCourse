@@ -17,4 +17,4 @@ spring:
       value-serializer: "org.apache.kafka.common.serialization.StringSerializer"
     task-topic: "tasks"
     message-topic: "messages"
-    
+    message-event-topic: "message-events"

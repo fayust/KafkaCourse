@@ -2,7 +2,7 @@ package ru.job4j.kafka.reqreply
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
-import ru.job4j.kafka.service.reqreply.ReqReplyService
+import ru.job4j.kafka.service.reqreply.ReqReplyNoKafkaService
 import java.util.concurrent.FutureTask
 
 class ReqReplyTest {
@@ -10,7 +10,7 @@ class ReqReplyTest {
     @Test
     fun testSendAndReceiveMatchingCorrelationId() {
         val correlationId = "1"
-        val replyService = ReqReplyService()
+        val replyService = ReqReplyNoKafkaService()
         val sendTask = FutureTask<String>  {
             replyService.sendMessage(correlationId,1000)
         }
@@ -25,7 +25,7 @@ class ReqReplyTest {
     @Test
     fun testSendAndNoReplyAndGetTimeout() {
         val correlationId = "1"
-        val replyService = ReqReplyService()
+        val replyService = ReqReplyNoKafkaService()
         val sendTask = FutureTask<String> {
             replyService.sendMessage(correlationId, 500)
         }
@@ -37,7 +37,7 @@ class ReqReplyTest {
     fun testSendAndReceiveNonMatchingCorrelationId() {
         val correlationId1 = "1"
         val correlationId2 = "2"
-        val replyService = ReqReplyService()
+        val replyService = ReqReplyNoKafkaService()
         val sendTask = FutureTask<String>  {
             replyService.sendMessage(correlationId1, 1000)
         }

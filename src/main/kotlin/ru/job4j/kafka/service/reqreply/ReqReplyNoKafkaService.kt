@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.FutureTask
 
 @Service
-class ReqReplyService {
+class ReqReplyNoKafkaService {
     private val reqReplyMap: ConcurrentHashMap<String, ReqReply> = ConcurrentHashMap()
 
     fun processReqReply(times: Int) {
