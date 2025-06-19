@@ -1,14 +1,16 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.10"
-    id("org.springframework.boot") version "3.0.0"
-    id("io.spring.dependency-management") version "1.0.15.RELEASE"
+    val kotlinVersion = "2.0.0"
+    kotlin("jvm") version kotlinVersion
+    id("org.springframework.boot") version "3.3.1"
+    id("io.spring.dependency-management") version "1.1.5"
+    kotlin("plugin.spring") version kotlinVersion
     id("checkstyle")
-    application
+    id("application")
 }
 
-group = "ru.job4j"
+group = "ru.job4j.kafka"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -16,7 +18,7 @@ repositories {
 }
 
 application {
-    mainClass.set("ru.job4j.kafka.KafkaCourseApplication.kt")
+    mainClass.set("ru.job4j.kafka.KafkaCourseApplicationKt")
 }
 
 dependencies {

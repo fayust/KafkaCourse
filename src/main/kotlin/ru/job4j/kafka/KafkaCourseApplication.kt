@@ -7,9 +7,9 @@ import ru.job4j.kafka.configuration.KafkaProperties
 
 @SpringBootApplication
 @EnableConfigurationProperties(KafkaProperties::class)
-open class KafkaCourseApplication
+class KafkaCourseApplication
 
 fun main(args: Array<String>) {
     runApplication<KafkaCourseApplication>(*args)
-    print("start Kafka Spring microservice...")
+    println("start Kafka Spring microservice...")
 }
