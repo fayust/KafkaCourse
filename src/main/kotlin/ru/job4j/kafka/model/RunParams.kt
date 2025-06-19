@@ -1,7 +1,7 @@
 package ru.job4j.kafka.model
 
-data class KafkaRunParams (
+data class RunParams (
     val consumerStartQuantity: Int,
     val reqReplyStartQuantity: Int,
-    val msg: String,
+    val msg: String
 )
