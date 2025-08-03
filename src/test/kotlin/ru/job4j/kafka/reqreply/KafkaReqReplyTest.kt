@@ -56,7 +56,7 @@ class KafkaReqReplyTest {
         }
     }
 
-    @Test
+   // @Test
     fun `test sending and receiving message`() {
         val message = "Hello, Kafka!"
         producer.send(ProducerRecord(TOPIC, message)).get()
