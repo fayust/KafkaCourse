@@ -34,14 +34,15 @@ class KafkaProducerService(private val kafkaProducer: KafkaProducer<String, Stri
         }
     }
 
+    /**
+     * Отправляет 1 сообщение в Кафку в корутине
+     */
     fun sendSingleToMessageEvent(msg: String) {
         val topic = kafkaProperties.messageEventTopic
         coroutineScope.launch {
             try {
-                kafkaProducer.use { producer ->
-                    val metadata: RecordMetadata = producer.send(ProducerRecord(topic, msg)).get()
-                    println("Sent message='$msg' to topic='${metadata.topic()}' partition=${metadata.partition()} offset=${metadata.offset()}")
-                }
+                val metadata: RecordMetadata = kafkaProducer.send(ProducerRecord(topic, msg)).get()
+                println("Sent message='$msg' to topic='${metadata.topic()}' partition=${metadata.partition()} offset=${metadata.offset()}")
             } catch (e: Exception) {
                 println("Error sending message='$msg': ${e.message}")
             }

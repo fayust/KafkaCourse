@@ -18,13 +18,19 @@ class KafkaController (private val consumerService: KafkaConsumerService,
                        private val reqReplyNoKafkaService: ReqReplyNoKafkaService,
                        private val reqReplyService: ReqReplyService) {
 
-
+    /**
+     *  Старт продюсера множественных сообщений в messageTopic.
+     *
+     */
     @PostMapping(value = ["/kafka/producer_run"])
     fun runKafkaProducer(): ResponseEntity<Void> {
         producerService.startProducer()
         return ResponseEntity.ok().build()
     }
 
+    /**
+     *  Старт нескольких отдельных потребителей messageTopic для анализа работы с группой потребителей
+     */
     @PostMapping(value = ["/kafka/consumer_run"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun runKafkaConsumer(@RequestBody params: RunParams): ResponseEntity<Void> {
         val consumerNum = params.consumerStartQuantity
@@ -37,16 +43,23 @@ class KafkaController (private val consumerService: KafkaConsumerService,
         return ResponseEntity.ok().build()
     }
 
+    /**
+     *  Старт шаблона ReqReply без Кафки на хранилище ConcurrentHashMap
+     */
     @PostMapping(value = ["/req_reply_run"])
     fun reqReplyTemplate(@RequestBody params: RunParams): ResponseEntity<Void> {
         reqReplyNoKafkaService.processReqReply(params.reqReplyStartQuantity)
         return ResponseEntity.ok().build()
     }
 
+    /**
+     *  Старт шаблона ReqReply с Кафкой. Работа с message-event-topic
+     *  Метод отправляет запрос в Кафку и сразу присылает ответ от консьюмера
+     */
     @PostMapping(value = ["/kafka/req_reply_run"])
-    fun reqReplyKafkaCall(@RequestBody params: RunParams): ResponseEntity<String> {
-        return ResponseEntity.ok().body(reqReplyService.startMessageEvent(params.msg))
+    fun getMessage(@RequestBody params: RunParams): ResponseEntity<String> {
+        val response = reqReplyService.startMessageEvent(params.msg)
+        return ResponseEntity.ok().body(response)
     }
-
 
 }

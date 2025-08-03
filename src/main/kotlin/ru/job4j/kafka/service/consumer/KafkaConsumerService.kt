@@ -6,8 +6,9 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.springframework.stereotype.Service
 import ru.job4j.kafka.configuration.KafkaProperties
 import java.time.Duration
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
+import java.util.Properties
+import java.util.concurrent.CountDownLatch
+
 
 @Service
 class KafkaConsumerService(private val kafkaConsumer: KafkaConsumer<String, String>,
@@ -92,29 +93,44 @@ class KafkaConsumerService(private val kafkaConsumer: KafkaConsumer<String, Stri
         })
     }
 
-    fun startMessageEventConsumerBlocking() : ConsumerRecord<String, String>? {
+    /**
+     * Поскольку KafkaConsumer не является потокобезопасным, не предназначен для одновременного доступа из нескольких потоков,
+     * он создается и закрывается при каждом запросе
+     */
+    fun startMessageEventConsumerBlocking(latch: CountDownLatch): ConsumerRecord<String, String>? {
         val topic = kafkaProperties.messageEventTopic
-        val executor = Executors.newSingleThreadExecutor()
-        val future: Future<ConsumerRecord<String, String>?> =
-            executor.submit<ConsumerRecord<String, String>?> {
-                kafkaConsumer.use { consumer ->
-                    consumer.subscribe(listOf(topic))
-                    try {
-                        while (true) {
-                            val records = consumer.poll(Duration.ofMillis(10000))
-                            if (records.isEmpty) continue
-                            for (rec in records) {
-                                println("MessageEvent consumer received message: key=${rec.key()}, value=${rec.value()}, partition=${rec.partition()}, offset=${rec.offset()}")
-                                return@submit rec // возврат значения из лямбда-выражения, которое передается в метод submit
-                            }
-                        }
-                    } catch (e: Exception) {
-                        println("MessageEvent consumer thread interrupted: ${e.message}")
+        var record: ConsumerRecord<String, String>? = null
+        val props = getConsumerProps()
+        val consumerNew = KafkaConsumer<String, String>(props)
+
+        consumerNew.use { consumer ->
+            consumer.subscribe(listOf(topic))
+            try {
+                while (true) {
+                    val records = consumer.poll(Duration.ofMillis(10000))
+                    if (records.isEmpty()) continue
+                    for (rec in records) {
+                        println("MessageEvent consumer received message: key=${rec.key()}, value=${rec.value()}, partition=${rec.partition()}, offset=${rec.offset()}")
+                        record = records.iterator().next()
+                        latch.countDown()
+                        break
                     }
+                    if (record != null) break
                 }
-                null // Возвращаем null, если ничего не было получено
+            } catch (e: Exception) {
+                println("MessageEvent consumer thread interrupted: ${e.message}")
             }
-        executor.shutdown()
-        return future.get() // Блокирует до получения сообщения
+        }
+        return record
+    }
+
+    fun getConsumerProps() : Properties {
+        return Properties().apply {
+            put("bootstrap.servers", kafkaProperties.bootstrapServers)
+            put("group.id", kafkaProperties.consumer.groupId)
+            put("key.deserializer", kafkaProperties.consumer.keyDeserializer)
+            put("value.deserializer", kafkaProperties.consumer.valueDeserializer)
+        }
     }
 }
+

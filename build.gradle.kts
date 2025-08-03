@@ -25,21 +25,24 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("ch.qos.logback:logback-classic:1.4.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     implementation("org.apache.kafka:kafka-clients:3.6.0")
-
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation(kotlin("test"))
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0")
     testImplementation ("org.junit.jupiter:junit-jupiter:5.8.1")
     testImplementation("org.junit.platform:junit-platform-launcher:1.8.0")
     testImplementation("io.mockk:mockk:1.13.17")
     testImplementation("org.hamcrest:hamcrest:3.0")
+
+    testImplementation("org.testcontainers:junit-jupiter:1.17.3")
+    testImplementation("org.testcontainers:kafka:1.17.3")
+    testImplementation("org.apache.kafka:kafka-clients:3.2.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.6.10")
 }
 
 kotlin {
