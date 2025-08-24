@@ -66,6 +66,9 @@ checkstyle {
 tasks.test {
     useJUnitPlatform()
     jvmArgs("--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED")
+    filter {
+        excludeTestsMatching("ru.job4j.kafka.reqreply.integration.*")
+    }
 }
 
 //gradle runIntegrationTests --info
