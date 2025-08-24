@@ -1,4 +1,4 @@
-package ru.job4j.kafka.reqreply
+package ru.job4j.kafka.reqreply.integration
 
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -56,7 +56,7 @@ class KafkaReqReplyTest {
         }
     }
 
-   // @Test
+    @Test
     fun `test sending and receiving message`() {
         val message = "Hello, Kafka!"
         producer.send(ProducerRecord(TOPIC, message)).get()

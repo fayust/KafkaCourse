@@ -2,8 +2,10 @@ package ru.job4j.kafka.controller
 
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import ru.job4j.kafka.model.RunParams
 import ru.job4j.kafka.service.consumer.KafkaConsumerService
@@ -56,9 +58,9 @@ class KafkaController (private val consumerService: KafkaConsumerService,
      *  Старт шаблона ReqReply с Кафкой. Работа с message-event-topic
      *  Метод отправляет запрос в Кафку и сразу присылает ответ от консьюмера
      */
-    @PostMapping(value = ["/kafka/req_reply_run"])
-    fun getMessage(@RequestBody params: RunParams): ResponseEntity<String> {
-        val response = reqReplyService.startMessageEvent(params.msg)
+    @GetMapping(value = ["/kafka/req_reply_run"])
+    fun getMessage(@RequestParam msg: String): ResponseEntity<String> {
+        val response = reqReplyService.startMessageEvent(msg)
         return ResponseEntity.ok().body(response)
     }
 

@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -39,10 +40,10 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.17")
     testImplementation("org.hamcrest:hamcrest:3.0")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.17.3")
-    testImplementation("org.testcontainers:kafka:1.17.3")
-    testImplementation("org.apache.kafka:kafka-clients:3.2.0")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.6.10")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.2")
+    testImplementation("org.testcontainers:kafka:1.20.2")
+    testImplementation("org.apache.kafka:kafka-clients:3.6.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.0")
 }
 
 kotlin {
@@ -52,9 +53,8 @@ kotlin {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions {
-        jvmTarget = "17" // версия JVM для Kotlin
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -66,6 +66,20 @@ checkstyle {
 tasks.test {
     useJUnitPlatform()
     jvmArgs("--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED")
+}
+
+//gradle runIntegrationTests --info
+//gradle runIntegrationTests --debug > debug.log
+tasks.register<Test>("runIntegrationTests") {
+    useJUnitPlatform()
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+
+    include("ru/job4j/kafka/reqreply/integration/*")
+
+    doLast {
+        println("Integration tests have been executed.")
+    }
 }
 
 gradle.startParameter.isBuildScan = false

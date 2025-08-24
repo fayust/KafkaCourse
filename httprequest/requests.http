@@ -17,9 +17,6 @@ Content-Type: application/json
   "reqReplyStartQuantity": 5
 }
 ###
-POST http://localhost:8882/kafka-course/api/v1/kafka/req_reply_run
+GET http://localhost:8882/kafka-course/api/v1/kafka/req_reply_run?msg=message%2039879789%20UHA
 Content-Type: application/json
 
-{
-  "msg": "message 39879789 UHA"
-}
