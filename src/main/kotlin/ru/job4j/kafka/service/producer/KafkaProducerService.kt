@@ -39,13 +39,25 @@ class KafkaProducerService(private val kafkaProducer: KafkaProducer<String, Stri
      */
     fun sendSingleToMessageEvent(msg: String) {
         val topic = kafkaProperties.messageEventTopic
+        val props = getProducerProps()
+        val produserNew = KafkaProducer<String, String>(props)
         coroutineScope.launch {
             try {
-                val metadata: RecordMetadata = kafkaProducer.send(ProducerRecord(topic, msg)).get()
+                val metadata: RecordMetadata = produserNew.send(ProducerRecord(topic, msg)).get()
                 println("Sent message='$msg' to topic='${metadata.topic()}' partition=${metadata.partition()} offset=${metadata.offset()}")
             } catch (e: Exception) {
                 println("Error sending message='$msg': ${e.message}")
             }
+        }
+    }
+
+    fun getProducerProps(): Properties {
+        return Properties().apply {
+            put("bootstrap.servers", kafkaProperties.bootstrapServers)
+            put("key.serializer", kafkaProperties.producer.keySerializer)
+            put("value.serializer", kafkaProperties.producer.valueSerializer)
+            put("enable.idempotence", "true")
+            put("acks", "all")
         }
     }
 

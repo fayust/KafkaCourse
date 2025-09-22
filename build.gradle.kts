@@ -35,7 +35,7 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation(kotlin("test"))
-    testImplementation ("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     testImplementation("org.junit.platform:junit-platform-launcher:1.8.0")
     testImplementation("io.mockk:mockk:1.13.17")
     testImplementation("org.hamcrest:hamcrest:3.0")
@@ -44,6 +44,7 @@ dependencies {
     testImplementation("org.testcontainers:kafka:1.20.2")
     testImplementation("org.apache.kafka:kafka-clients:3.6.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.0.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
 }
 
 kotlin {

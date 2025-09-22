@@ -13,7 +13,7 @@ class ReqReplyService(private val consumerService: KafkaConsumerService,
     /**
      *  Реализация шаблона ReqReply с Кафкой.
      *  Продюсер отправляет запрос в Кафку, блокируется в ожидании ответа и, получив его из того же топика,
-     *  сразу сразу отдает ответ клиенту
+     *  сразу отдает ответ клиенту
      */
     fun startMessageEvent(msg: String) : String  {
         producerService.sendSingleToMessageEvent(msg)
