@@ -22,6 +22,8 @@ data class KafkaProperties @ConstructorBinding constructor(
 
         data class ProducerProperties @ConstructorBinding constructor(
             var keySerializer: String,
-            var valueSerializer: String
+            var valueSerializer: String,
+            var enableIdempotence: String,
+            var acks: String,
         )
 }

@@ -3,7 +3,6 @@ package ru.job4j.kafka.service.producer
 import kotlinx.coroutines.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.clients.producer.RecordMetadata
 import org.springframework.stereotype.Service
 import ru.job4j.kafka.configuration.KafkaProperties
 import java.util.*
@@ -43,7 +42,7 @@ class KafkaProducerService(private val kafkaProducer: KafkaProducer<String, Stri
         val produserNew = KafkaProducer<String, String>(props)
         coroutineScope.launch {
             try {
-                val metadata: RecordMetadata = produserNew.send(ProducerRecord(topic, msg)).get()
+                val metadata = produserNew.send(ProducerRecord(topic, msg)).get()
                 println("Sent message='$msg' to topic='${metadata.topic()}' partition=${metadata.partition()} offset=${metadata.offset()}")
             } catch (e: Exception) {
                 println("Error sending message='$msg': ${e.message}")
@@ -56,8 +55,8 @@ class KafkaProducerService(private val kafkaProducer: KafkaProducer<String, Stri
             put("bootstrap.servers", kafkaProperties.bootstrapServers)
             put("key.serializer", kafkaProperties.producer.keySerializer)
             put("value.serializer", kafkaProperties.producer.valueSerializer)
-            put("enable.idempotence", "true")
-            put("acks", "all")
+            put("enable.idempotence", kafkaProperties.producer.enableIdempotence)
+            put("acks", kafkaProperties.producer.acks)
         }
     }
 
