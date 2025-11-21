@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import ru.job4j.kafka.model.RunParams
+import ru.job4j.kafka.domain.entity.model.OutboxDto
+import ru.job4j.kafka.domain.entity.model.RunParamsDto
 import ru.job4j.kafka.service.consumer.KafkaConsumerService
+import ru.job4j.kafka.service.outbox.OutboxBusinessService
 import ru.job4j.kafka.service.producer.KafkaProducerService
 import ru.job4j.kafka.service.reqreply.ReqReplyService
 import ru.job4j.kafka.service.reqreply.ReqReplyNoKafkaService
@@ -18,7 +20,8 @@ import ru.job4j.kafka.service.reqreply.ReqReplyNoKafkaService
 class KafkaController (private val consumerService: KafkaConsumerService,
                        private val producerService: KafkaProducerService,
                        private val reqReplyNoKafkaService: ReqReplyNoKafkaService,
-                       private val reqReplyService: ReqReplyService) {
+                       private val reqReplyService: ReqReplyService,
+                       private val outboxBusinessService: OutboxBusinessService) {
 
     /**
      *  Старт продюсера множественных сообщений в messageTopic.
@@ -34,7 +37,7 @@ class KafkaController (private val consumerService: KafkaConsumerService,
      *  Старт нескольких отдельных потребителей messageTopic для анализа работы с группой потребителей
      */
     @PostMapping(value = ["/kafka/consumer_run"], consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun runKafkaConsumer(@RequestBody params: RunParams): ResponseEntity<Void> {
+    fun runKafkaConsumer(@RequestBody params: RunParamsDto): ResponseEntity<Void> {
         val consumerNum = params.consumerStartQuantity
         if (consumerNum > 0)
             consumerService.startMainConsumer()
@@ -49,7 +52,7 @@ class KafkaController (private val consumerService: KafkaConsumerService,
      *  Старт шаблона ReqReply без Кафки на хранилище ConcurrentHashMap
      */
     @PostMapping(value = ["/req_reply_run"])
-    fun reqReplyTemplate(@RequestBody params: RunParams): ResponseEntity<Void> {
+    fun reqReplyTemplate(@RequestBody params: RunParamsDto): ResponseEntity<Void> {
         reqReplyNoKafkaService.processReqReply(params.reqReplyStartQuantity)
         return ResponseEntity.ok().build()
     }
@@ -62,6 +65,15 @@ class KafkaController (private val consumerService: KafkaConsumerService,
     fun getMessage(@RequestParam msg: String): ResponseEntity<String> {
         val response = reqReplyService.startMessageEvent(msg)
         return ResponseEntity.ok().body(response)
+    }
+
+    /**
+     *  Старт шаблона Transactional Outbox
+     */
+    @PostMapping(value = ["/outbox"])
+    fun outboxTemplate(@RequestBody outboxDto: OutboxDto): ResponseEntity<Void> {
+        outboxBusinessService.executeBusinessAndOutbox(outboxDto)
+        return ResponseEntity.ok().build()
     }
 
 }

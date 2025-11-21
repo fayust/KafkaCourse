@@ -1,6 +1,6 @@
-package ru.job4j.kafka.model
+package ru.job4j.kafka.domain.entity.model
 
-data class RunParams (
+data class RunParamsDto (
     val consumerStartQuantity: Int,
     val reqReplyStartQuantity: Int
 )

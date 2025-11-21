@@ -5,6 +5,8 @@ server:
   error:
     include-message: always
 spring:
+  application:
+    name: kafka-course
   kafka:
     bootstrap-servers: "localhost:29092"
     consumer:
@@ -13,6 +15,7 @@ spring:
       key-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
       value-deserializer: "org.apache.kafka.common.serialization.StringDeserializer"
     producer:
+      retries: 3
       key-serializer: "org.apache.kafka.common.serialization.StringSerializer"
       value-serializer: "org.apache.kafka.common.serialization.StringSerializer"
       enable-idempotence: "true"
@@ -20,3 +23,7 @@ spring:
     task-topic: "tasks"
     message-topic: "messages"
     message-event-topic: "message-events"
+
+  data:
+    mongodb:
+      uri: mongodb://admin:admin@localhost:27017/kafka_course_db?authSource=admin&retryWrites=false

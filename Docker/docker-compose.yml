@@ -1,4 +1,18 @@
 services:
+  db:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGODB_DATABASE: kafka_course_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - kafka-network
+
   zookeeper:
     image: zookeeper:3.8.0
     hostname: zookeeper
@@ -201,5 +215,10 @@ services:
 #      - kafka
 #      - zookeeper
 
-#volumes: #снаружи контейнера
+networks:
+  kafka-network:
+    driver: bridge
+
+volumes: #снаружи контейнера
+  mongo_data:
 #  kafka-data:
