@@ -1,19 +1,12 @@
 package ru.job4j.kafka.service.outbox
 
-import org.springframework.data.domain.Sort
-import org.springframework.data.mongodb.core.FindAndModifyOptions
-import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
+
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.job4j.kafka.configuration.KafkaProperties
-import ru.job4j.kafka.domain.entity.OutboxEvent
 import ru.job4j.kafka.repository.outbox.OutboxRepository
-import java.time.Instant
 
 
 @Service

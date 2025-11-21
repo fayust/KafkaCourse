@@ -2,7 +2,6 @@ package ru.job4j.kafka.mongock.changelogs
 
 
 import com.mongodb.client.model.CreateCollectionOptions
-import com.mongodb.client.model.IndexOptions
 import com.mongodb.client.model.Indexes
 import com.mongodb.client.model.ValidationAction
 import com.mongodb.client.model.ValidationLevel
